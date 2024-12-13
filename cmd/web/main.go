@@ -18,11 +18,14 @@ func main() {
 	if err != nil {
 		log.Fatal("cannot create template cache")
 	}
+	app.UseCache = false
 	app.TemplateCache = tc
+	repo:= handlers.NewRepository(&app)
+	handlers.NewHandler(repo)
 	render.NewTemplates(&app)
-	
-	http.HandleFunc("/", handlers.Home)
-	http.HandleFunc("/about", handlers.About)
+
+	http.HandleFunc("/", handlers.Repo.Home)
+	http.HandleFunc("/about", handlers.Repo.About)
 
 	fmt.Printf("Server started on port %s", portNumber)
 	_ = http.ListenAndServe(portNumber, nil)
