@@ -9,29 +9,41 @@ import (
 	"path/filepath"
 
 	"github.com/Farmaan-Malik/Go-Templating/pkg/config"
+	"github.com/Farmaan-Malik/Go-Templating/pkg/models"
 )
+
 var app *config.AppConfig
 
-func NewTemplates(a *config.AppConfig){
+func NewTemplates(a *config.AppConfig) {
 	app = a
 }
-func RenderTemplate(w http.ResponseWriter, tmpl string) {
+
+func AddDefaultData(td *models.TemplateData) *models.TemplateData {
+	return td
+}
+
+func RenderTemplate(w http.ResponseWriter, tmpl string, td *models.TemplateData) {
 	var tc map[string]*template.Template
 
-	if app.UseCache{
-		tc= app.TemplateCache
-	}else{
-		tc,_=CreateTemplateCache()
+	if app.UseCache {
+		tc = app.TemplateCache
+	} else {
+		tc, _ = CreateTemplateCache()
 	}
-	
+
 	t, ok := tc[tmpl]
 	if !ok {
 		log.Fatal("couldn't get template from template cache")
 	}
+
+	
 	//create a buffer
 	buf := new(bytes.Buffer)
+
+	//adds default data
+	td = AddDefaultData(td)
 	//execute the template file in t and store the data in a buffer "buf"
-	_ = t.Execute(buf, nil)
+	_ = t.Execute(buf, td)
 	//render the template by writing the data in the buffer to the esponseWriter
 	_, err := buf.WriteTo(w)
 	if err != nil {
